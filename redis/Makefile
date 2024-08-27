@@ -4,7 +4,7 @@ all: check-script load run
 
 check-script:
 ifndef lua
-	$(error 未指定脚本。请使用 'make lua=name_of_script.lua' 来指定一个脚本文件)
+	$(error 未指定脚本,请使用 'make lua=name_of_script.lua' 来指定一个脚本文件)
 endif
 
 load:
