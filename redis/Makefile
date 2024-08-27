@@ -1,24 +1,19 @@
-# 默认情况下，lua 变量为空
 lua ?=
 
-# 默认目标，执行 run
 all: check-script load run
 
-# 验证是否已提供脚本名，如果没有则终止执行
 check-script:
 ifndef lua
-	$(error No script specified. Use 'make lua=name_of_script.lua' to specify a script)
+	$(error 未指定脚本。请使用 'make lua=name_of_script.lua' 来指定一个脚本文件)
 endif
 
-# 加载脚本到 Redis 并获取 SHA1
 load:
-	$(eval SHA1 := $(shell cat $(lua) | redis-cli SCRIPT LOAD))
-	@if [ -z "$(SHA1)" ]; then echo "Error loading script. Make sure redis-cli is available and Redis is running."; exit 1; fi
-	@echo "Script $(lua) loaded with SHA1: $(SHA1)"
+	$(eval SHA1 := $(shell redis-cli SCRIPT LOAD `cat $(lua)`))
+	@if [ -z "$(SHA1)" ]; then echo "错误：加载脚本失败。请确保 redis-cli 可用并且 Redis 服务器正在运行。"; exit 1; fi
+	@echo "脚本 $(lua) 已加载，SHA1: $(SHA1)"
 
-# 执行脚本，需要确保 load 被首先调用或已经加载过脚本
 run:
-	@echo "Running script $(lua)..."
-	@redis-cli EVALSHA $(SHA1) 0 || echo "Failed to execute script. Check SHA1 and Redis server status."
+	@echo "正在运行脚本 $(lua)..."
+	@redis-cli EVALSHA $(SHA1) 0 || echo "执行脚本失败。请检查 SHA1 和 Redis 服务器状态。"
 
 .PHONY: all load run check-script
